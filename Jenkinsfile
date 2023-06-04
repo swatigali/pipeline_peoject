@@ -33,7 +33,7 @@ pipeline{
         
         stage('Docker Build'){
             steps{
-                sh 'docker build -t swatigali/main_docker_new_image .'
+                sh 'docker build -t swatigali/main_docker_n_image .'
             }
         }
         
@@ -42,7 +42,7 @@ pipeline{
                 withCredentials([string(credentialsId: 'dockerhub', variable: 'dockerpush')]) {
                 sh 'docker login -u swatigali -p ${dockerpush}'
                 }
-                 sh 'docker push swatigali/main_docker_new_image'
+                 sh 'docker push swatigali/main_docker_n_image'
             }
            
         }
