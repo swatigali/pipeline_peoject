@@ -13,23 +13,38 @@ pipeline{
                 git branch: 'main', url: 'https://github.com/swatigali/pipeline_peoject.git'
             }
         }
-        stage('Build'){
+        
+        stage("SonarQube_check_quality"){
+            
             steps{
-                sh 'mvn install'
-            }
-        }
+                script{
+                    withSonarQubeEnv(credentialsId: 'sonartoken') {
+                      sh 'mvn sonar:sonar'
+                      
+                   }
+                    def qg = waitForQualityGate()
+                      if (qg.status != 'OK') {
+                           error "Pipeline aborted due to quality gate failure: ${qg.status}"
+                      }
+                    sh "mvn clean install"  
+                }
+               }
+             }  
+        
         stage('Docker Build'){
             steps{
-                sh 'docker build -t swatigali/myjavaproject10may23 .'
+                sh 'docker build -t swatigali/main_docker_image .'
             }
         }
-         stage('Docker Push'){
+        
+        stage('Docker Push'){
             steps{
-                withCredentials([string(credentialsId: 'docker_hub', variable: 'dockerpush')]) {
+                withCredentials([string(credentialsId: 'dockerhub', variable: 'dockerpush')]) {
                 sh 'docker login -u swatigali -p ${dockerpush}'
                 }
-                 sh 'docker push swatigali/myjavaproject10may23'
+                 sh 'docker push swatigali/main_docker_image'
             }
+           
+        }
     }
-}    
 }
